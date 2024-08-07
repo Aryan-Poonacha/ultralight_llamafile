@@ -1,9 +1,9 @@
-# Basic Llamafile Chatbot 
+# Ultra-Lightweight Llamafile Chatbot 
 
-[![CI/CD](https://img.shields.io/github/workflow/status/YOUR_USERNAME/YOUR_REPO_NAME/Build%20and%20Test)](https://github.com/YOUR_USERNAME/YOUR_REPO_NAME/actions)
+[![CI/CD]](https://github.com/Aryan-Poonacha/llamafile_chatbot/actions)
 [![Demo Video](LINK_TO_YOUR_DEMO_VIDEO)](LINK_TO_YOUR_DEMO_VIDEO)
 
-This is a minimal chatbot application that demonstrates how to use a `llamafile` model to create a simple conversational agent.
+This is a minimal chatbot application with all parameters, model selection, and relevant application decisions tuned such that that a tinyllama `llamafile` model can be used to create a simple conversational agent that can be deployed in low compute, low-power edge computing cases. This project would be ideal for deployment on a Raspberry Pi or Arduino use case. A Dockerized container deployment is provided to create the most lightweight docker container for the model.
 
 ## Architecture
 
@@ -37,12 +37,26 @@ Run `make lint` which runs `ruff check`.  You can find out more info on [Ruff he
 
 1. **Prerequisites:**
    - Install [Docker](https://docs.docker.com/get-docker/).
-   - Download the `TinyLlama-1.1B-Chat-v1.0.F16.llamafile` model from [https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles](https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles) and place it in the root of the project directory.
+   - Download the `TinyLlama-1.1B-Chat-v1.0.F16.llamafile` model from [https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles](https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles) and place it in the root of the project directory inside the 'llamafile' folder.
 
-2. **Run Locally:**
+2. **Launch TinyLlama Local Server:**
+   - On Mac/Linux, provide permission to launch the llamafile with `chmod +x TinyLlama-1.1B-Chat-v1.0.F16.llamafile`. Then, navigate to the directory and run the file with `./llava-v1.5-7b-q4.llamafile`. This will launch the locallama server.
+
+3. **Interact Locally via CLI:**
    - Navigate to the project directory in your terminal.
    - Run `python main.py`.
    - Start chatting!
+
+![Streamlit](img/cmd.PNG)
+
+2. **Interact Locally via web interface:**
+
+The project also includes a web interface created using streamlit to keep track of a conversation with chat history to have a conversation with the model. To run it:
+   - Navigate to the project directory in your terminal.
+   - Run `streamlit run app.py`.
+   - Start chatting!
+
+![Streamlit](img/streamlit.PNG)
 
 3. **Run with Docker:**
    - Build the image: `docker build -t my-chatbot .`
@@ -57,10 +71,26 @@ Run `make lint` which runs `ruff check`.  You can find out more info on [Ruff he
 
 Run unit tests: `python -m unittest test_main.py`
 
+The unit tests are also part of the CI/CD pipeline and run automatically on every push.
+
 ## Examples
 
-**Input:** Hello there!
-**Output:** Hi! How can I help you today?
+**Input:** Write a fibonacci sequence function.
+**Output:**
+
+```
+`def fibonacci(n):
+    """
+    Returns the nth Fibonacci number.
+    """
+    if n < 2:
+        return n
+    else:
+        return fibonacci(n-1) + fibonacci(n-2)
+```
+Here's how you can use it:
+python
+>>> fibonacci(10)
 
 ## Performance/Evaluation 
 
@@ -71,7 +101,6 @@ Run unit tests: `python -m unittest test_main.py`
 - Implement a more sophisticated chatbot interface (web UI, command-line arguments).
 - Incorporate error handling and edge-case management.
 - Explore more advanced functionalities of the `llamafile` model.
-Based on the python ruff template provided. Created for IDS 706, Fall 2023.
 
 ## References
 
