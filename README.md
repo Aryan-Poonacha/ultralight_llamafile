@@ -42,6 +42,8 @@ Run `make lint` which runs `ruff check`.  You can find out more info on [Ruff he
 2. **Launch TinyLlama Local Server:**
    - On Mac/Linux, provide permission to launch the llamafile with `chmod +x TinyLlama-1.1B-Chat-v1.0.F16.llamafile`. Then, navigate to the directory and run the file with `./llava-v1.5-7b-q4.llamafile`. This will launch the locallama server.
 
+   - On Windows, you will need to setup WSL and get to the stage of having a WSL terminal active. Then, follow the above steps. Alternatively, you can follow the steps provided (here)[https://github.com/Mozilla-Ocho/llamafile] to launch it from a normal windows CMD prompt.
+
 3. **Interact Locally via CLI:**
    - Navigate to the project directory in your terminal.
    - Run `python main.py`.
@@ -54,6 +56,7 @@ Run `make lint` which runs `ruff check`.  You can find out more info on [Ruff he
 The project also includes a web interface created using streamlit to keep track of a conversation with chat history to have a conversation with the model. To run it:
    - Navigate to the project directory in your terminal.
    - Run `streamlit run app.py`.
+   - The streamlit interface will launch in your default browser.
    - Start chatting!
 
 ![Streamlit](img/streamlit.PNG)
@@ -66,7 +69,7 @@ The project also includes a web interface created using streamlit to keep track 
         -v $(pwd)/TinyLlama-1.1B-Chat-v1.0.F16.llamafile:/app/TinyLlama-1.1B-Chat-v1.0.F16.llamafile  \ 
         my-chatbot 
       ```
-
+      
 ## Testing
 
 Run unit tests: `python -m unittest test_main.py`
