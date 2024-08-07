@@ -1,5 +1,4 @@
 import subprocess
-import os
 
 def run_chatbot(model_path, user_input):
     """Runs the llamafile model with user input and returns the response.
