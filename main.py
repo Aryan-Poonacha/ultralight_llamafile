@@ -2,9 +2,8 @@
 #!/usr/bin/env python3
 from openai import OpenAI
 
-def run_chatbot(user_input):
-    """Runs the chatbot, sending user input to the llamafile
-    model and returning the response."""
+def run_chatbot(user_input, instructions="You are a helpful AI assistant."):
+    """Runs the chatbot, sending user input to the llamafile model and returning the response."""
 
     try:
         client = OpenAI(
@@ -15,7 +14,7 @@ def run_chatbot(user_input):
         completion = client.chat.completions.create(
             model="LLaMA_CPP",
             messages=[
-                {"role": "system", "content": "You are a helpful AI assistant."},
+                {"role": "system", "content": instructions},
                 {"role": "user", "content": user_input} 
             ]
         )
@@ -26,9 +25,13 @@ def run_chatbot(user_input):
         return "An error occurred."
 
 if __name__ == "__main__":
+    instructions = input("Enter custom system instructions (leave blank for default): ")
+    if not instructions:
+        instructions = "You are a helpful AI assistant."
+    
     while True:
         user_input = input("You: ")
         if user_input.lower() == "exit":
             break
-        response = run_chatbot(user_input)
+        response = run_chatbot(user_input, instructions)
         print(f"Chatbot: {response}")

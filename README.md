@@ -1,7 +1,12 @@
 # Ultra-Lightweight Llamafile Chatbot 
 
+## CI/CD Badge:
 [![CI/CD]](https://github.com/Aryan-Poonacha/llamafile_chatbot/actions)
+
+## Demo Video:
 [![Demo Video](LINK_TO_YOUR_DEMO_VIDEO)](LINK_TO_YOUR_DEMO_VIDEO)
+
+## Project Purpose
 
 This is a minimal chatbot application with all parameters, model selection, and relevant application decisions tuned such that that a tinyllama `llamafile` model can be used to create a simple conversational agent that can be deployed in low compute, low-power edge computing cases. This project would be ideal for deployment on a Raspberry Pi or Arduino use case. A Dockerized container deployment is provided to create the most lightweight docker container for the model.
 
@@ -9,29 +14,12 @@ This is a minimal chatbot application with all parameters, model selection, and 
 
 This project utilizes a simple architecture:
 
-- **`main.py`:** Contains the core logic to run the chatbot, interacting with the llamafile model.
-- **`TinyLlama-1.1B-Chat-v1.0.F16.llamafile`:** (Not included in the repository) The pre-trained language model used by the chatbot.
+- **`main.py`:** Contains the core logic to run the chatbot, interacting with the llamafile model and the local server that it deploys.
+- **`llamafile/TinyLlama-1.1B-Chat-v1.0.F16.llamafile`:** (Not included in the repository) The pre-trained language model used by the chatbot. Run within the WSL container on Windows.
+-**app.py**: The script for the streamlit frontend interface to interact.
 - **Docker:** The application is packaged into a Docker container for easy deployment.
 
-## Github Actions
-
-Things included are:
-
-* `Makefile`
-
-* `Pytest`
-
-* `pandas`
-
-* `Ruff`:  
-
-Run `make lint` which runs `ruff check`.  You can find out more info on [Ruff here](https://github.com/astral-sh/ruff).
-
-* `Dockerfile`
-
-* `GitHub copilot`
-
-* `jupyter` and `ipython` 
+### Architecture Diagram
 
 ## Setup and Running
 
@@ -69,7 +57,7 @@ The project also includes a web interface created using streamlit to keep track 
         -v $(pwd)/TinyLlama-1.1B-Chat-v1.0.F16.llamafile:/app/TinyLlama-1.1B-Chat-v1.0.F16.llamafile  \ 
         my-chatbot 
       ```
-      
+
 ## Testing
 
 Run unit tests: `python -m unittest test_main.py`
@@ -98,6 +86,26 @@ python
 ## Performance/Evaluation 
 
 (Add any performance observations or benchmarks here. For a simple project like this, focus on qualitative aspects like response time and coherence).
+
+## CI/CD Pipeline Github Actions
+
+Things included are:
+
+* `Makefile`
+
+* `Pytest`
+
+* `pandas`
+
+* `Ruff`:  
+
+Run `make lint` which runs `ruff check`.  You can find out more info on [Ruff here](https://github.com/astral-sh/ruff).
+
+* `Dockerfile`
+
+* `GitHub copilot`
+
+* `jupyter` and `ipython` 
 
 ## Future Improvements
 
