@@ -2,7 +2,8 @@ import streamlit as st
 from openai import OpenAI
 
 def run_chatbot(user_input):
-    """Runs the chatbot, sending user input to the llamafile model and returning the response."""
+    """Runs the chatbot, sending user input to the llamafile 
+    model and returning the response."""
     try:
         client = OpenAI(
             base_url="http://localhost:8080/v1",  
