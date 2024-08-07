@@ -1,3 +1,6 @@
+#ignore llamafile
+llamafile/
+
 #ignore huggingface
 summarizeApp
 #ignore fine-tuning
