@@ -1,15 +1,14 @@
-      
 #!/usr/bin/env python3
 from openai import OpenAI
 
-def run_chatbot(user_input, instructions="You are a helpful AI assistant."):
+def run_chatbot(user_input, port=8080, instructions="You are a helpful AI assistant."):
     """
     Runs the chatbot. This function is NOT directly tested in unit tests 
     as it requires a live server. 
     """
     try:
         client = OpenAI(
-            base_url="http://localhost:8080/v1",  
+            base_url=f"http://localhost:{port}/v1",  
             api_key="sk-no-key-required" 
         )
 
@@ -56,11 +55,19 @@ if __name__ == "__main__":
         instructions = "You are a helpful AI assistant."
 
     while True:
+        port = input("Enter the port number of the local server to use (default is 8080): ")
+        if not port:
+            port = 8080
+        else:
+            try:
+                port = int(port)
+            except ValueError:
+                print("Invalid port number. Please enter a valid integer.")
+                continue
+
         user_input = input("You: ")
         processed_user_input = process_user_input(user_input)
-        response = run_chatbot(processed_user_input)
+        response = run_chatbot(processed_user_input, port, instructions)
         print(f"Chatbot: {response}")
         if response == "Exiting...":
             break
-
-    
