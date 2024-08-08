@@ -35,6 +35,17 @@ def process_user_input(user_input):
     if user_input.lower() == "exit":
         return "Exiting..."
     else:
+        return user_input
+
+def process_user_input_test(user_input):
+    """
+    Processes user input, handling 'exit' and returning a response.
+    This function can be unit tested as it doesn't directly call 
+    the external API.
+    """
+    if user_input.lower() == "exit":
+        return "Exiting..."
+    else:
         # In a real application, you would call run_chatbot here, 
         # but we'll return a placeholder for testing.
         return "Chatbot response (mocked)" 
@@ -46,7 +57,8 @@ if __name__ == "__main__":
 
     while True:
         user_input = input("You: ")
-        response = process_user_input(user_input)
+        processed_user_input = process_user_input(user_input)
+        response = run_chatbot(processed_user_input)
         print(f"Chatbot: {response}")
         if response == "Exiting...":
             break
