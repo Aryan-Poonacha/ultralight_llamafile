@@ -23,25 +23,34 @@ def run_chatbot(user_input):
     except Exception as e:
         return f"An error occurred: {e}"
 
-# Initialize chat history
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+def initialize_session_state():
+    """Initializes the chat history in session state."""
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
+def add_message(role, content):
+    """Adds a message to the chat history in session state."""
+    st.session_state.messages.append({"role": role, "content": content})
+
+def display_chat_history():
+    """Displays the chat history from session state."""
+    for message in st.session_state.messages:
+        if message["role"] == "user":
+            st.write(f"You: {message['content']}")
+        else:
+            st.markdown(f"Chatbot: {message['content']}", unsafe_allow_html=True)
+
+# --- Main Streamlit App (unchanged, but logic is now in functions) --- 
 st.title("Chat with LLaMA")
 
-# User input
+initialize_session_state()
+
 user_input = st.text_input("You: ", "")
 if st.button("Send"):
     if user_input:
-        # Append user message to chat history
-        st.session_state.messages.append({"role": "user", "content": user_input})
+        add_message("user", user_input)
+        # --- We'll mock this part in our tests ---
         response = run_chatbot(user_input)
-        # Append chatbot response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        add_message("assistant", response)
 
-# Display chat history
-for message in st.session_state.messages:
-    if message["role"] == "user":
-        st.write(f"You: {message['content']}")
-    else:
-        st.markdown(f"Chatbot: {message['content']}", unsafe_allow_html=True)
+display_chat_history()

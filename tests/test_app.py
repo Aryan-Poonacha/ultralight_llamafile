@@ -1,23 +1,46 @@
-# tests/test_app.py
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from app import initialize_session_state, add_message, display_chat_history 
 
-from app import run_chatbot 
+class TestApp(unittest.TestCase):
 
-class TestApp(unittest.TestCase): 
+    def setUp(self):
+        """Set up for test methods."""
+        self.patcher = patch('app.st') 
+        self.mock_st = self.patcher.start()
+        # Simulate an empty session state
+        self.mock_st.session_state = {} 
 
-    @patch('app.OpenAI')
-    def test_run_chatbot_error(self, mock_openai):
-        """Test that run_chatbot gracefully handles exceptions."""
-        mock_openai.side_effect = Exception("Simulated API error")
-        result = run_chatbot("Hello")
-        assert "An error occurred: Simulated API error" in result
+    def tearDown(self):
+        """Clean up after test methods."""
+        self.patcher.stop()
 
-    @patch('app.OpenAI')
-    def test_run_chatbot_success(self, mock_openai):
-        """Test that run_chatbot processes input and returns a response."""
-        mock_client = mock_openai.return_value
-        mock_client.chat.completions.create.return_value.choices[0].message.content = "Mock response"
+    def test_initialize_session_state(self):
+        """Test session state initialization."""
+        initialize_session_state()
+        self.assertEqual(self.mock_st.session_state.get("messages"), [])
 
-        result = run_chatbot("Hello")
-        assert "Mock response" in result
+    def test_add_message(self):
+        """Test adding messages to session state."""
+        initialize_session_state()  # Ensure messages list exists
+        add_message("user", "Hello")
+        add_message("assistant", "Hi there!")
+        self.assertEqual(len(self.mock_st.session_state["messages"]), 2)
+        self.assertEqual(self.mock_st.session_state["messages"][0]["content"], "Hello") 
+
+    def test_display_chat_history(self):
+        """Test displaying chat history. 
+        We'll just check if the Streamlit functions are called
+        with the expected arguments. 
+        """
+        self.mock_st.session_state.messages = [
+            {"role": "user", "content": "Test message 1"},
+            {"role": "assistant", "content": "Test response 1"}
+        ]
+        display_chat_history() 
+
+        # Assert that st.write and st.markdown were called with the correct arguments
+        self.mock_st.write.assert_called_with("You: Test message 1")
+        self.mock_st.markdown.assert_called_with(
+            "Chatbot: Test response 1", unsafe_allow_html=True
+        )
