@@ -1,4 +1,3 @@
-# tests/test_app.py
 import unittest
 from streamlit.testing.v1 import AppTest
 
@@ -14,7 +13,7 @@ class TestStreamlitApp(unittest.TestCase):
 
     def test_add_message(self):
         self.at.run()
-        self.at.text_input("Enter your message:").input("Hello").run()
+        self.at.text_input("You: ").input("Hello").run()  # Updated label to match app.py
         self.assertEqual(self.at.session_state["messages"], [{"role": "user", "content": "Hello"}])
 
     def test_display_chat_history(self):
