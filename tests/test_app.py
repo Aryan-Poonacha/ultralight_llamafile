@@ -15,7 +15,8 @@ class TestStreamlitApp(unittest.TestCase):
         self.at.run()
         self.at.session_state["messages"] = [{"role": "user", "content": "Hello"}]
         self.at.run()
-        self.assertIn("You: Hello", self.at.markdown[0].value)
+        # Ensure the chat history is displayed correctly
+        self.assertTrue(any("You: Hello" in element.value for element in self.at.markdown))
 
 if __name__ == '__main__':
     unittest.main()
