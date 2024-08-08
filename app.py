@@ -2,7 +2,8 @@ import streamlit as st
 from openai import OpenAI
 
 def run_chatbot(user_input, port, instructions):
-    """Runs the chatbot, sending user input to the LLaMA model and returning the response."""
+    """Runs the chatbot, sending user input to
+      LLaMA model and returning the response."""
     try:
         client = OpenAI(
             base_url=f"http://localhost:{port}/v1",  
@@ -44,8 +45,10 @@ st.title("Chat with LLaMA")
 
 initialize_session_state()
 
-instructions = st.text_input("Enter custom system instructions (leave blank for default):", "You are a helpful AI assistant.")
-port = st.text_input("Enter the port number of the local server to use (default is 8080):", "8080")
+instructions = st.text_input("Enter custom system instructions (blank for default):",
+                             "You are a helpful AI assistant.")
+port = st.text_input("Enter port no of local server (default=8080):",
+                     "8080")
 
 if st.button("Start Chat"):
     try:
