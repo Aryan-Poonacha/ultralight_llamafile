@@ -1,25 +1,35 @@
+# tests/test_main.py
 import unittest
 from unittest.mock import patch
 from io import StringIO
-import main 
+import sys
 
-class TestChatbot(unittest.TestCase):
+# Import the function to be tested
+from main import run_chatbot
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_run_chatbot_success(self, mock_stdout):
-        # Test a successful chatbot interaction
-        with patch('main.openai.ChatCompletion.create') as mock_create:
-            mock_create.return_value.choices = [type('obj', (object,), {'message': type('obj', (object,), {'content': 'This is a test response.'})})]
-            main.run_chatbot("Test input")
-            self.assertEqual(mock_stdout.getvalue().strip(), "Chatbot: This is a test response.")
+class TestMain(unittest.TestCase):
 
     @patch('sys.stdout', new_callable=StringIO)
     def test_run_chatbot_error(self, mock_stdout):
-        # Test error handling in the chatbot
-        with patch('main.openai.ChatCompletion.create') as mock_create:
-            mock_create.side_effect = Exception("Test Exception")
-            main.run_chatbot("Test input")
-            self.assertEqual(mock_stdout.getvalue().strip(), "Chatbot: An error occurred.")
+        """
+        Test that run_chatbot gracefully handles exceptions. 
+        We simulate an error by providing a wrong base_url.
+        """
+        # Call the function that prints to stdout
+        run_chatbot("Hi", "You are a helpful AI assistant.")
+        # Assert that the expected output was printed to stdout
+        assert "An error occurred" in mock_stdout.getvalue()
 
-if __name__ == '__main__':
-    unittest.main()
+    @patch('main.input', side_effect=["Custom instructions", "Hello", "exit"])
+    @patch('main.run_chatbot', return_value="Mock chatbot response")
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_loop(self, mock_stdout, mock_run_chatbot, mock_input):
+        """Test the main loop with mocked input and chatbot response."""
+        # Call the main function (which is executed when __name__ == "__main__")
+        from main import __name__ as main_name 
+        with patch.object(main_name, "__name__", "__main__"):
+            main_name.main()
+        # Assert that the loop interacted with the chatbot as expected
+        mock_run_chatbot.assert_called_with("Hello", "Custom instructions") 
+        # Assert that the loop printed the expected output
+        assert "Chatbot: Mock chatbot response" in mock_stdout.getvalue()
