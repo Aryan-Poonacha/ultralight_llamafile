@@ -32,6 +32,8 @@ This project utilizes a simple architecture:
 
    - On Windows, you will need to setup WSL and get to the stage of having a WSL terminal active. Then, follow the above steps. Alternatively, you can follow the steps provided (here)[https://github.com/Mozilla-Ocho/llamafile] to launch it from a normal windows CMD prompt.
 
+   - **Model Selection** - Under the llamafile folder, you can place multiple llamafile to support different models. For each one, you can follow the steps above to launch a separate local server instance for each model. By default, they will be initialized to ports in increments of 1 from 8080 (so model 1 will be at 8080, model 2 will be at 8081, etc.)
+
 3. **Interact Locally via CLI:**
    - Navigate to the project directory in your terminal.
    - Run `python main.py`.
