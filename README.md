@@ -68,9 +68,10 @@ The project also includes a web interface created using streamlit to keep track 
 
 ## Testing
 
-Run unit tests: `python -m unittest test_main.py`
+Run unit tests: `python -m unittest tests/test_main.py`
+`python -m unittest tests/test_app.py`
 
-The unit tests are also part of the CI/CD pipeline and run automatically on every push.
+These unit tests are also part of the CI/CD pipeline and run automatically on every push.
 
 ## Examples
 
