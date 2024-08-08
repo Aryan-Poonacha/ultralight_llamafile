@@ -50,12 +50,12 @@ def process_user_input_test(user_input):
         return "Chatbot response (mocked)" 
 
 if __name__ == "__main__":
-    instructions = input("Enter custom system instructions (leave blank for default): ")
+    instructions = input("Enter custom system instructions(blank for default):")
     if not instructions:
         instructions = "You are a helpful AI assistant."
 
     while True:
-        port = input("Enter the port number of the local server to use (default is 8080): ")
+        port = input("Enter port no of local server to use (default is 8080):")
         if not port:
             port = 8080
         else:

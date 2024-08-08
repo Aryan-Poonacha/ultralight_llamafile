@@ -1,19 +1,18 @@
 import streamlit as st
 from openai import OpenAI
 
-def run_chatbot(user_input):
-    """Runs the chatbot, sending user input to the llamafile 
-    model and returning the response."""
+def run_chatbot(user_input, port, instructions):
+    """Runs the chatbot, sending user input to the LLaMA model and returning the response."""
     try:
         client = OpenAI(
-            base_url="http://localhost:8080/v1",  
+            base_url=f"http://localhost:{port}/v1",  
             api_key="sk-no-key-required" 
         )
 
         completion = client.chat.completions.create(
             model="LLaMA_CPP",
             messages=[
-                {"role": "system", "content": "You are a helpful AI assistant."},
+                {"role": "system", "content": instructions},
                 {"role": "user", "content": user_input} 
             ]
         )
@@ -40,17 +39,25 @@ def display_chat_history():
         else:
             st.markdown(f"Chatbot: {message['content']}", unsafe_allow_html=True)
 
-# --- Main Streamlit App (unchanged, but logic is now in functions) --- 
+# --- Main Streamlit App ---
 st.title("Chat with LLaMA")
 
 initialize_session_state()
 
-user_input = st.text_input("You: ", "")
-if st.button("Send"):
-    if user_input:
-        add_message("user", user_input)
-        # --- We'll mock this part in our tests ---
-        response = run_chatbot(user_input)
-        add_message("assistant", response)
+instructions = st.text_input("Enter custom system instructions (leave blank for default):", "You are a helpful AI assistant.")
+port = st.text_input("Enter the port number of the local server to use (default is 8080):", "8080")
 
-display_chat_history()
+if st.button("Start Chat"):
+    try:
+        port = int(port)
+    except ValueError:
+        st.error("Invalid port number. Please enter a valid integer.")
+    else:
+        user_input = st.text_input("You: ", "")
+        if st.button("Send"):
+            if user_input:
+                add_message("user", user_input)
+                response = run_chatbot(user_input, port, instructions)
+                add_message("assistant", response)
+
+        display_chat_history()
