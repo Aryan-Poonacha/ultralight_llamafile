@@ -98,7 +98,7 @@ We cite some of the performance numbers for TinyLlama and Rocket with a number o
 
 1. TinyLlama:
 
-![alt text](benchmark1.png)
+![alt text](benchmark.png)
 [Source](https://huggingface.co/TinyLlama/TinyLlama_v1.1)
 
 2. Rocket:
@@ -139,6 +139,3 @@ This pipeline ensures that the code is always in a deployable state and adheres 
 Gospel:
 
 ![1 1-function-essence-of-programming](https://github.com/nogibjj/python-ruff-template/assets/58792/f7f33cd3-cff5-4014-98ea-09b6a29c7557)
-
-
-
