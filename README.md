@@ -4,7 +4,7 @@
 ![example workflow](https://github.com/Aryan-Poonacha/llamafile_chatbot/actions/workflows/cicd.yml/badge.svg)
 
 ## Demo Video:
-[![Demo Video](LINK_TO_YOUR_DEMO_VIDEO)](LINK_TO_YOUR_DEMO_VIDEO)
+[Demo Video](https://duke.zoom.us/rec/share/FVUQFJnsAUbYvdiW5L7bnvKL8xGU1GG8fK5jN6MJ8JEwSe8_yrknT1PJP216Fu0N.LraUKK13s-PAaB_D?startTime=1723086198000)
 
 ## Project Purpose
 
