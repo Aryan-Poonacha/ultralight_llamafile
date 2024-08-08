@@ -1,31 +1,33 @@
 # Ultra-Lightweight Llamafile Chatbot 
 
 ## CI/CD Badge:
-[![CI/CD]](https://github.com/Aryan-Poonacha/llamafile_chatbot/actions)
+![example workflow](https://github.com/Aryan-Poonacha/llamafile_chatbot/actions/workflows/cicd.yml/badge.svg)
 
 ## Demo Video:
 [![Demo Video](LINK_TO_YOUR_DEMO_VIDEO)](LINK_TO_YOUR_DEMO_VIDEO)
 
 ## Project Purpose
 
-This is a minimal chatbot application with all parameters, model selection, and relevant application decisions tuned such that that a tinyllama `llamafile` model can be used to create a simple conversational agent that can be deployed in low compute, low-power edge computing cases. This project would be ideal for deployment on a Raspberry Pi or Arduino use case. A Dockerized container deployment is provided to create the most lightweight docker container for the model.
+This is a minimal chatbot application with all parameters, model selections, and relevant application decisions tuned such that that a tinyllama and Rocket `llamafile` model can be used to create simple conversational agents that can be deployed in low compute, low-power edge computing cases. This project would be ideal for deployment on a Raspberry Pi or Arduino use case. A Dockerized container deployment is provided to create the most lightweight docker container for the model.
 
 ## Architecture
 
 This project utilizes a simple architecture:
 
-- **`main.py`:** Contains the core logic to run the chatbot, interacting with the llamafile model and the local server that it deploys.
-- **`llamafile/TinyLlama-1.1B-Chat-v1.0.F16.llamafile`:** (Not included in the repository) The pre-trained language model used by the chatbot. Run within the WSL container on Windows.
--**app.py**: The script for the streamlit frontend interface to interact.
+- **`main.py`:** Contains the core logic to run the chatbot, interacting with the llamafile model and the local server that it deploys through a CLI interface.
+- **`llamafile/TinyLlama-1.1B-Chat-v1.0.F16.llamafile`:** (Not included in the repository) The pre-trained language model used by the chatbot. Run within the WSL container on Windows or directly on Mac/Linux.
+-**app.py**: The script for the streamlit frontend interface to interact with the chatbot. This is used for the Docker container as it is the main functional part of the application.
 - **Docker:** The application is packaged into a Docker container for easy deployment.
 
 ### Architecture Diagram
+
+![Diagram](img/diagram.png)
 
 ## Setup and Running
 
 1. **Prerequisites:**
    - Install [Docker](https://docs.docker.com/get-docker/).
-   - Download the `TinyLlama-1.1B-Chat-v1.0.F16.llamafile` model from [https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles](https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles) and place it in the root of the project directory inside the 'llamafile' folder.
+   - Download the `TinyLlama-1.1B-Chat-v1.0.F16.llamafile` model from [https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles](https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles) and place it in the root of the project directory inside the 'llamafile' folder. Download any other llamafiles for other models that you want to use. For this use case, the TinyLlama-1.1B-Chat and rocket-3b.Q5 models were chosen as the optimal smallest high performance models for this use case, and are the ones I would recommend.
 
 2. **Launch TinyLlama Local Server:**
    - On Mac/Linux, provide permission to launch the llamafile with `chmod +x TinyLlama-1.1B-Chat-v1.0.F16.llamafile`. Then, navigate to the directory and run the file with `./llava-v1.5-7b-q4.llamafile`. This will launch the locallama server.
@@ -37,6 +39,8 @@ This project utilizes a simple architecture:
 3. **Interact Locally via CLI:**
    - Navigate to the project directory in your terminal.
    - Run `python main.py`.
+   - Specify a custom system prompt if desired.
+   - Choose the server port to choose the model you wish to use.
    - Start chatting!
 
 ![Streamlit](img/cmd.PNG)
@@ -47,6 +51,8 @@ The project also includes a web interface created using streamlit to keep track 
    - Navigate to the project directory in your terminal.
    - Run `streamlit run app.py`.
    - The streamlit interface will launch in your default browser.
+   - Specify a custom system prompt if desired.
+   - Choose the server port to choose the model you wish to use.
    - Start chatting!
 
 ![Streamlit](img/streamlit.PNG)
@@ -87,33 +93,45 @@ python
 
 ## Performance/Evaluation 
 
-(Add any performance observations or benchmarks here. For a simple project like this, focus on qualitative aspects like response time and coherence).
+We cite some of the performance numbers for TinyLlama and Rocket with a number of benchmarks to justify our model choice below.
+
+1. TinyLlama:
+
+![alt text](benchmark1.png)
+[Source](https://huggingface.co/TinyLlama/TinyLlama_v1.1)
+
+2. Rocket:
+
+![benchmarks](https://cdn-uploads.huggingface.co/production/uploads/6501bfe0493fd9c8c2e32402/5Tv4-4w4zNKAAjiLNGu7A.png)
+[Source](https://huggingface.co/pansophic/rocket-3B)
 
 ## CI/CD Pipeline Github Actions
 
-Things included are:
+The CI/CD pipeline for this project is managed using GitHub Actions. The workflow is triggered on push events to the main branch, pull requests to the main branch, and manual workflow dispatches.
 
-* `Makefile`
+Here is a brief overview of the steps involved in the pipeline:
 
-* `Pytest`
+Checkout: The workflow starts by checking out the latest code from the repository.
 
-* `pandas`
+Install Packages: The necessary packages are installed by running the make install command. This command upgrades pip and installs the requirements specified in the requirements.txt file.
 
-* `Ruff`:  
+Lint: The make lint command is run to perform linting checks on the Python files in the repository.
 
-Run `make lint` which runs `ruff check`.  You can find out more info on [Ruff here](https://github.com/astral-sh/ruff).
+Test: Unit tests are executed by running the make test command. This command runs all the test cases present in the tests directory.
 
-* `Dockerfile`
+Format: The Python files are formatted using the black formatter by running the make format command.
 
-* `GitHub copilot`
+Set up Docker Buildx: Docker Buildx is set up using the docker/setup-buildx-action@v1 action. Docker Buildx is a CLI plugin that extends the docker build command with the full support of the features provided by Moby BuildKit builder toolkit.
 
-* `jupyter` and `ipython` 
+Login to DockerHub: The workflow logs into DockerHub using the docker/login-action@v1 action. The DockerHub username and token are stored as secrets in the GitHub repository.
+
+Build and Push Docker Image: The Docker image is built and pushed to DockerHub by running the make build && make push commands. The Docker image is tagged with the latest tag.
+
+This pipeline ensures that the code is always in a deployable state and adheres to the standards set by the team. It automates the process of code integration, testing, and deployment, thereby increasing the development speed and reducing the chances of integration problems.
 
 ## Future Improvements
 
-- Implement a more sophisticated chatbot interface (web UI, command-line arguments).
-- Incorporate error handling and edge-case management.
-- Explore more advanced functionalities of the `llamafile` model.
+- Directly integrate into edge computing cases using appropriate hardware.
 
 ## References
 
