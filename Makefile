@@ -20,12 +20,20 @@ container-lint:
 
 refactor: format lint
 
-#replace xxx with the .py (without the .py) file that you want to run
 deploy:
 	python -m main
 
 #if u want a different run file that's different from deploy
 run:
 	python -m main
-		
-all: install lint test format deploy
+
+IMAGE_NAME = irevia/llamafile_chatbot_app
+VERSION = latest
+
+build:
+	docker build -t $(IMAGE_NAME):$(VERSION) .
+
+push:
+	docker push $(IMAGE_NAME):$(VERSION)
+
+all: install lint test format deploy build push
