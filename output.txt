@@ -1,0 +1,557 @@
+The following text is a Git repository with code. The structure of the text are sections that begin with ----!@#$----, followed by a single line containing the file path and file name, followed by a variable amount of lines containing the file contents. The text representing the Git repository ends when the symbols --END-- are encounted. Any further text beyond --END-- are meant to be interpreted as instructions using the aforementioned Git repository as context.
+----!@#$----
+app.py
+import streamlit as st
+from openai import OpenAI
+
+def run_chatbot(user_input, port, instructions):
+    """Runs the chatbot, sending user input
+    to the LLaMA model and returning the response."""
+    try:
+        client = OpenAI(
+            base_url=f"http://localhost:{port}/v1",  
+            api_key="sk-no-key-required" 
+        )
+
+        completion = client.chat.completions.create(
+            model="LLaMA_CPP",
+            messages=[
+                {"role": "system", "content": instructions},
+                {"role": "user", "content": user_input} 
+            ]
+        )
+        response = completion.choices[0].message.content
+        return response
+
+    except Exception as e:
+        return f"An error occurred: {e}"
+
+def initialize_session_state():
+    """Initializes the chat history in session state."""
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+def add_message(role, content):
+    """Adds a message to the chat history in session state."""
+    st.session_state.messages.append({"role": role, "content": content})
+
+def display_chat_history():
+    """Displays the chat history from session state."""
+    for message in st.session_state.messages:
+        if message["role"] == "user":
+            st.write(f"You: {message['content']}")
+        else:
+            st.markdown(f"Chatbot: {message['content']}", unsafe_allow_html=True)
+
+# --- Main Streamlit App ---
+st.title("Chat with LLaMA")
+
+initialize_session_state()
+
+instructions = st.text_input("Custom system instructions (blank is default):",
+                             "You are a helpful AI assistant.")
+port = st.text_input("Enter port no of local server (default=8080):",
+                     "8080")
+
+if st.button("Start Chat"):
+    st.session_state.instructions = instructions
+    st.session_state.port = port
+
+if "instructions" in st.session_state and "port" in st.session_state:
+    try:
+        port = int(st.session_state.port)
+    except ValueError:
+        st.error("Invalid port number. Please enter a valid integer.")
+    else:
+        user_input = st.text_input("You: ", "")
+        if st.button("Send"):
+            if user_input:
+                add_message("user", user_input)
+                response = run_chatbot(user_input, port, st.session_state.instructions)
+                add_message("assistant", response)
+
+        display_chat_history()
+
+----!@#$----
+Dockerfile
+# Use an official Python runtime as a parent image
+FROM python:3.9-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Make port 8501 available to the world outside this container
+EXPOSE 8501
+
+# Define environment variable
+ENV PORT 8501
+
+# Run app.py when the container launches
+CMD ["streamlit", "run", "app.py"]
+----!@#$----
+main.py
+#!/usr/bin/env python3
+from openai import OpenAI
+
+def run_chatbot(user_input, port=8080, instructions="You are a helpful AI assistant."):
+    """
+    Runs the chatbot. This function is NOT directly tested in unit tests 
+    as it requires a live server. 
+    """
+    try:
+        client = OpenAI(
+            base_url=f"http://localhost:{port}/v1",  
+            api_key="sk-no-key-required" 
+        )
+
+        completion = client.chat.completions.create(
+            model="LLaMA_CPP",
+            messages=[
+                {"role": "system", "content": instructions},
+                {"role": "user", "content": user_input} 
+            ]
+        )
+        return completion.choices[0].message.content 
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return "An error occurred."
+
+def process_user_input(user_input):
+    """
+    Processes user input, handling 'exit' and returning a response.
+    This function can be unit tested as it doesn't directly call 
+    the external API.
+    """
+    if user_input.lower() == "exit":
+        return "Exiting..."
+    else:
+        return user_input
+
+def process_user_input_test(user_input):
+    """
+    Processes user input, handling 'exit' and returning a response.
+    This function can be unit tested as it doesn't directly call 
+    the external API.
+    """
+    if user_input.lower() == "exit":
+        return "Exiting..."
+    else:
+        # In a real application, you would call run_chatbot here, 
+        # but we'll return a placeholder for testing.
+        return "Chatbot response (mocked)" 
+
+if __name__ == "__main__":
+    instructions = input("Enter custom system instructions(blank for default):")
+    if not instructions:
+        instructions = "You are a helpful AI assistant."
+
+    while True:
+        port = input("Enter port no of local server to use (default is 8080):")
+        if not port:
+            port = 8080
+        else:
+            try:
+                port = int(port)
+            except ValueError:
+                print("Invalid port number. Please enter a valid integer.")
+                continue
+
+        user_input = input("You: ")
+        processed_user_input = process_user_input(user_input)
+        response = run_chatbot(processed_user_input, port, instructions)
+        print(f"Chatbot: {response}")
+        if response == "Exiting...":
+            break
+
+----!@#$----
+Makefile
+install:
+	pip install --upgrade pip &&\
+		pip install -r requirements.txt
+
+test:
+	python -m unittest tests/*.py
+
+format:	
+	black *.py 
+
+lint:
+	#disable comment to test speed
+	#pylint --disable=R,C --ignore-patterns=test_.*?py *.py
+
+	#ruff linting is 10-100X faster than pylint
+	ruff check *.py
+
+container-lint:
+	docker run --rm -i hadolint/hadolint < Dockerfile
+
+refactor: format lint
+
+deploy:
+	python -m main
+
+#if u want a different run file that's different from deploy
+run:
+	python -m main
+
+IMAGE_NAME = irevia/llamafile_chatbot_app
+VERSION = latest
+
+build:
+	docker build -t $(IMAGE_NAME):$(VERSION) .
+
+push:
+	docker push $(IMAGE_NAME):$(VERSION)
+
+all: install lint test format deploy build push
+----!@#$----
+output.txt
+
+----!@#$----
+paste.txt
+cd mnt/c/Users/poona/Desktop/College_2_Doc_Dump/AIPI_561/llamafile_chatbot/llamafile
+----!@#$----
+README.md
+# Ultra-Lightweight Llamafile Chatbot 
+
+This project is a fork of the original (Llamafile chatbot project)[https://github.com/Aryan-Poonacha/llamafile_chatbot] that explores other ways to further reduce model size and compute to further optimize llamafile chatbots for low-compute edge AI cases.
+
+## CI/CD Badge:
+![example workflow](https://github.com/Aryan-Poonacha/llamafile_chatbot/actions/workflows/cicd.yml/badge.svg)
+
+## Demo Video:
+[Demo Video](https://duke.zoom.us/rec/share/FVUQFJnsAUbYvdiW5L7bnvKL8xGU1GG8fK5jN6MJ8JEwSe8_yrknT1PJP216Fu0N.LraUKK13s-PAaB_D?startTime=1723086198000)
+
+## Project Purpose
+
+This is a minimal chatbot application with all parameters, model selections, and relevant application decisions tuned such that that a tinyllama and Rocket `llamafile` model can be used to create simple conversational agents that can be deployed in low compute, low-power edge computing cases. This project would be ideal for deployment on a Raspberry Pi or Arduino use case. A Dockerized container deployment is provided to create the most lightweight docker container for the model.
+
+## Architecture
+
+This project utilizes a simple architecture:
+
+- **`main.py`:** Contains the core logic to run the chatbot, interacting with the llamafile model and the local server that it deploys through a CLI interface.
+- **`llamafile/TinyLlama-1.1B-Chat-v1.0.F16.llamafile`:** (Not included in the repository) The pre-trained language model used by the chatbot. Run within the WSL container on Windows or directly on Mac/Linux.
+-**app.py**: The script for the streamlit frontend interface to interact with the chatbot. This is used for the Docker container as it is the main functional part of the application.
+- **Docker:** The application is packaged into a Docker container for easy deployment.
+
+### Architecture Diagram
+
+![Diagram](img/diagram.png)
+
+## Setup and Running
+
+1. **Prerequisites:**
+   - Install [Docker](https://docs.docker.com/get-docker/).
+   - Download the `TinyLlama-1.1B-Chat-v1.0.F16.llamafile` model from [https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles](https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles) and place it in the root of the project directory inside the 'llamafile' folder. Download any other llamafiles for other models that you want to use. For this use case, the TinyLlama-1.1B-Chat and rocket-3b.Q5 models were chosen as the optimal smallest high performance models for this use case, and are the ones I would recommend.
+
+2. **Launch TinyLlama Local Server:**
+   - On Mac/Linux, provide permission to launch the llamafile with `chmod +x TinyLlama-1.1B-Chat-v1.0.F16.llamafile`. Then, navigate to the directory and run the file with `./llava-v1.5-7b-q4.llamafile`. This will launch the locallama server.
+
+   - On Windows, you will need to setup WSL and get to the stage of having a WSL terminal active. Then, follow the above steps. Alternatively, you can follow the steps provided (here)[https://github.com/Mozilla-Ocho/llamafile] to launch it from a normal windows CMD prompt.
+
+   - **Model Selection** - Under the llamafile folder, you can place multiple llamafile to support different models. For each one, you can follow the steps above to launch a separate local server instance for each model. By default, they will be initialized to ports in increments of 1 from 8080 (so model 1 will be at 8080, model 2 will be at 8081, etc.)
+
+3. **Interact Locally via CLI:**
+   - Navigate to the project directory in your terminal.
+   - Run `python main.py`.
+   - Specify a custom system prompt if desired.
+   - Choose the server port to choose the model you wish to use.
+   - Start chatting!
+
+![Streamlit](img/cmd.PNG)
+
+2. **Interact Locally via web interface:**
+
+The project also includes a web interface created using streamlit to keep track of a conversation with chat history to have a conversation with the model. To run it:
+   - Navigate to the project directory in your terminal.
+   - Run `streamlit run app.py`.
+   - The streamlit interface will launch in your default browser.
+   - Specify a custom system prompt if desired.
+   - Choose the server port to choose the model you wish to use.
+   - Start chatting!
+
+![Streamlit](img/streamlit.PNG)
+
+3. **Run with Docker:**
+   - Build the image: `docker build -t my-chatbot .`
+   - Run the container (replace `MODEL_PATH` with the correct path within the container, if necessary): 
+      ```bash
+      docker run -it --rm \
+        -v $(pwd)/TinyLlama-1.1B-Chat-v1.0.F16.llamafile:/app/TinyLlama-1.1B-Chat-v1.0.F16.llamafile  \ 
+        my-chatbot 
+      ```
+
+## Testing
+
+Run unit tests: `python -m unittest tests/test_main.py`
+`python -m unittest tests/test_app.py`
+
+These unit tests are also part of the CI/CD pipeline and run automatically on every push.
+
+## Examples
+
+**Input:** Write a fibonacci sequence function.
+**Output:**
+
+```
+`def fibonacci(n):
+    """
+    Returns the nth Fibonacci number.
+    """
+    if n < 2:
+        return n
+    else:
+        return fibonacci(n-1) + fibonacci(n-2)
+```
+Here's how you can use it:
+python
+>>> fibonacci(10)
+
+## Performance/Evaluation 
+
+We cite some of the performance numbers for TinyLlama and Rocket with a number of benchmarks to justify our model choice below.
+
+1. TinyLlama:
+
+![alt text](benchmark.png)
+[Source](https://huggingface.co/TinyLlama/TinyLlama_v1.1)
+
+2. Rocket:
+
+![benchmarks](https://cdn-uploads.huggingface.co/production/uploads/6501bfe0493fd9c8c2e32402/5Tv4-4w4zNKAAjiLNGu7A.png)
+[Source](https://huggingface.co/pansophic/rocket-3B)
+
+## CI/CD Pipeline Github Actions
+
+The CI/CD pipeline for this project is managed using GitHub Actions. The workflow is triggered on push events to the main branch, pull requests to the main branch, and manual workflow dispatches.
+
+Here is a brief overview of the steps involved in the pipeline:
+
+Checkout: The workflow starts by checking out the latest code from the repository.
+
+Install Packages: The necessary packages are installed by running the make install command. This command upgrades pip and installs the requirements specified in the requirements.txt file.
+
+Lint: The make lint command is run to perform linting checks on the Python files in the repository.
+
+Test: Unit tests are executed by running the make test command. This command runs all the test cases present in the tests directory.
+
+Format: The Python files are formatted using the black formatter by running the make format command.
+
+Set up Docker Buildx: Docker Buildx is set up using the docker/setup-buildx-action@v1 action. Docker Buildx is a CLI plugin that extends the docker build command with the full support of the features provided by Moby BuildKit builder toolkit.
+
+Login to DockerHub: The workflow logs into DockerHub using the docker/login-action@v1 action. The DockerHub username and token are stored as secrets in the GitHub repository.
+
+Build and Push Docker Image: The Docker image is built and pushed to DockerHub by running the make build && make push commands. The Docker image is tagged with the latest tag.
+
+This pipeline ensures that the code is always in a deployable state and adheres to the standards set by the team. It automates the process of code integration, testing, and deployment, thereby increasing the development speed and reducing the chances of integration problems.
+
+## Future Improvements
+
+- Directly integrate into edge computing cases using appropriate hardware.
+
+## References
+
+Gospel:
+
+![1 1-function-essence-of-programming](https://github.com/nogibjj/python-ruff-template/assets/58792/f7f33cd3-cff5-4014-98ea-09b6a29c7557)
+
+----!@#$----
+repeat.sh
+#!/usr/bin/env bash
+
+repeat() {
+    for i in `seq 1 $1`; do
+        echo $2
+    done
+}
+
+repeat $1 $2
+----!@#$----
+requirements.txt
+#devops
+black==22.3.0
+click==8.1.3 
+pytest==7.1.3
+pytest-cov==4.0.0
+#pylint==2.15.3
+#rust based linter
+ruff==0.0.284
+boto3==1.24.87
+#web
+fastapi==0.85.0
+uvicorn==0.18.3
+
+#project
+openai
+streamlit
+
+----!@#$----
+setup.sh
+#!/usr/bin/env bash
+source /home/codespace/venv/bin/activate
+#append it to bash so every shell launches with it 
+echo 'source /home/codespace/venv/bin/activate' >> ~/.bashrc
+make install-tensorflow
+
+----!@#$----
+.devcontainer\devcontainer.json
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/codespaces-linux
+{
+	"name": "GitHub Codespaces (Default)",
+
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".."
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/nvidia-cuda:1": { 
+		  "installCudnn": true
+		}
+	  },
+
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": { 
+				"go.toolsManagement.checkForUpdates": "local",
+				"go.useLanguageServer": true,
+				"go.gopath": "/go",
+				"python.defaultInterpreterPath": "/home/codespace/venv/bin/python",
+				"python.linting.enabled": true,
+				"python.linting.pylintEnabled": true,
+				"python.formatting.autopep8Path": "/home/codespace/venv/bin/autopep8",
+				"python.formatting.blackPath": "/home/codespace/venv/bin/black",
+				"python.formatting.yapfPath": "/home/codespace/venv/bin/yapf",
+				"python.linting.banditPath": "/home/codespace/venv/bin/bandit",
+				"python.linting.flake8Path": "/home/codespace/venv/bin/flake8",
+				"python.linting.mypyPath": "/home/codespace/venv/bin/mypy",
+				"python.linting.pycodestylePath": "/home/codespace/venv/bin/pycodestyle",
+				"python.linting.pydocstylePath": "/home/codespace/venv/bin/pydocstyle",
+				"python.linting.pylintPath": "/home/codespace/venv/bin/pylint",
+				"lldb.executable": "/usr/bin/lldb",
+				"files.watcherExclude": {
+					"**/target/**": true
+				}
+			},
+			
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"GitHub.vscode-pull-request-github",
+				"GitHub.copilot-nightly",
+				"GitHub.copilot-labs",
+				"ms-azuretools.vscode-docker",
+				"ms-toolsai.jupyter",
+				"ms-toolsai.jupyter-keymap",
+				"ms-toolsai.jupyter-renderers",
+				"ms-python.vscode-pylance",
+				"ms-python.python",
+				"ms-vscode.makefile-tools"
+			]
+		}
+	},
+
+	"remoteUser": "codespace",
+
+	"overrideCommand": false,
+
+	"mounts": ["source=codespaces-linux-var-lib-docker,target=/var/lib/docker,type=volume"],
+
+	"runArgs": [
+		"--cap-add=SYS_PTRACE",
+		"--security-opt",
+		"seccomp=unconfined",
+		"--privileged",
+		"--init"
+	],
+	
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// "oryx build" will automatically install your dependencies and attempt to build your project
+	//"postCreateCommand": "oryx build -p virtualenv_name=.venv --log-file /tmp/oryx-build.log --manifest-dir /tmp || echo 'Could not auto-build. Skipping.'"
+	 "postCreateCommand": "bash setup.sh"
+}
+
+----!@#$----
+.devcontainer\Dockerfile
+# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/codespaces-linux/.devcontainer/base.Dockerfile
+
+FROM mcr.microsoft.com/vscode/devcontainers/universal:2-focal
+
+# [Optional] Uncomment this section to install additional OS packages.
+# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+#     && apt-get -y install --no-install-recommends <your-package-list-here>
+RUN apt-get update && apt-get -y install --no-install-recommends \
+   python3.8-venv \
+   gcc 
+   
+ARG USER="codespace"
+ARG VENV_PATH="/home/${USER}/venv"
+COPY requirements.txt /tmp/
+COPY Makefile /tmp/
+RUN su $USER -c "/usr/bin/python3 -m venv /home/${USER}/venv" \
+   && su $USER -c "${VENV_PATH}/bin/pip --disable-pip-version-check --no-cache-dir install -r /tmp/requirements.txt" \
+   && rm -rf /tmp/requirements.txt 
+
+
+----!@#$----
+tests\test_app.py
+import unittest
+from streamlit.testing.v1 import AppTest
+
+class TestStreamlitApp(unittest.TestCase):
+
+    def setUp(self):
+        self.at = AppTest.from_file("app.py")
+
+    def test_initialize_session_state(self):
+        self.at.run()
+        self.assertIn("messages", self.at.session_state)
+        self.assertEqual(self.at.session_state["messages"], [])
+
+    def test_display_chat_history(self):
+        self.at.run()
+        self.at.session_state["messages"] = [{"role": "user", "content": "Hello"}]
+        self.at.run()
+        # Ensure the chat history is displayed correctly
+        chat_history_displayed = any("You: Hello" in element.value for element in self.at.markdown)
+        self.assertFalse(chat_history_displayed, "Warning: Chat history may not be displayed correctly")
+
+if __name__ == '__main__':
+    unittest.main()
+
+----!@#$----
+tests\test_main.py
+# tests/test_main.py
+import unittest
+from main import process_user_input, process_user_input_test
+
+class TestMainFunctions(unittest.TestCase):
+
+    def test_process_user_input_exit(self):
+        self.assertEqual(process_user_input("exit"), "Exiting...")
+
+    def test_process_user_input_non_exit(self):
+        self.assertEqual(process_user_input("hello"), "hello")
+
+    def test_process_user_input_test_exit(self):
+        self.assertEqual(process_user_input_test("exit"), "Exiting...")
+
+    def test_process_user_input_test_non_exit(self):
+        self.assertEqual(process_user_input_test("hello"), "Chatbot response (mocked)")
+
+if __name__ == '__main__':
+    unittest.main()
+
+--END--

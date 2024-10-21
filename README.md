@@ -1,5 +1,7 @@
 # Ultra-Lightweight Llamafile Chatbot 
 
+This project demonstrates building an ultra-lightweight chatbot application using `llamafile` models like TinyLlama and Rocket. By optimizing model selection and deployment strategies, this project aims to enable chatbot deployments on resource-constrained edge devices such as Raspberry Pi or Arduino.  The Docker image size is minimized for efficient deployment and resource utilization (the image is approximately 1.8 - 2 GB).  Using `llamafile` allows for local model execution, ensuring data privacy and reducing reliance on external APIs.  This project is a fork of [original Llamafile chatbot project](https://github.com/Aryan-Poonacha/llamafile_chatbot), modified to improve specifically containerization, Streamlit UI, and simultaneous multi-model support.
+
 ## CI/CD Badge:
 ![example workflow](https://github.com/Aryan-Poonacha/llamafile_chatbot/actions/workflows/cicd.yml/badge.svg)
 
@@ -8,7 +10,13 @@
 
 ## Project Purpose
 
-This is a minimal chatbot application with all parameters, model selections, and relevant application decisions tuned such that that a tinyllama and Rocket `llamafile` model can be used to create simple conversational agents that can be deployed in low compute, low-power edge computing cases. This project would be ideal for deployment on a Raspberry Pi or Arduino use case. A Dockerized container deployment is provided to create the most lightweight docker container for the model.
+This is a minimal chatbot application with all parameters, model selections, and relevant application decisions tuned such that that a tinyllama and Rocket `llamafile` model can be used to create simple conversational agents that can be deployed in low compute, low-power edge computing cases. This project would be ideal for deployment on a Raspberry Pi or Arduino use case. A Dockerized container deployment is provided to create the most lightweight docker container for the model. Key features include:
+
+* **Local Execution:**  Utilizes `llamafile` for on-device processing, enhancing privacy and minimizing latency.
+* **Multi-Model Support:** Accommodates various `llamafile` models (TinyLlama, Rocket, etc.) for flexibility.
+* **Streamlit Web Interface:**  Provides a user-friendly interface for interacting with the chatbot.
+* **Dockerized Deployment:** Simplifies deployment and ensures consistency across different environments.
+* **Optimized for Edge:** Designed for low-compute, low-power scenarios, ideal for Raspberry Pi, Arduino, and similar devices.
 
 ## Architecture
 
@@ -27,10 +35,23 @@ This project utilizes a simple architecture:
 
 1. **Prerequisites:**
    - Install [Docker](https://docs.docker.com/get-docker/).
+   - Install Python 3.9 and \venv:
+   ``sudo apt-get update && sudo apt-get install python3.9 python3.9-venv``
+   - Create and activate virtual environment:
+   ``\python3 -m venv .venv && source .venv/bin/activate``
    - Download the `TinyLlama-1.1B-Chat-v1.0.F16.llamafile` model from [https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles](https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles) and place it in the root of the project directory inside the 'llamafile' folder. Download any other llamafiles for other models that you want to use. For this use case, the TinyLlama-1.1B-Chat and rocket-3b.Q5 models were chosen as the optimal smallest high performance models for this use case, and are the ones I would recommend.
 
 2. **Launch TinyLlama Local Server:**
-   - On Mac/Linux, provide permission to launch the llamafile with `chmod +x TinyLlama-1.1B-Chat-v1.0.F16.llamafile`. Then, navigate to the directory and run the file with `./llava-v1.5-7b-q4.llamafile`. This will launch the locallama server.
+   - On Mac/Linux, provide permission to launch the llamafile with `chmod +x TinyLlama-1.1B-Chat-v1.0.F16.llamafile`. Then, navigate to the directory and run the file with `./llava-v1.5-7b-q4.llamafile`. This will launch the locallama server. Specifically:
+
+```bash
+cd llamafile
+chmod +x TinyLlama-1.1B-Chat-v1.0.F16.llamafile #  Give execute permissions
+./TinyLlama-1.1B-Chat-v1.0.F16.llamafile &   # Run in the background
+# Repeat the above two lines for other models, incrementing the port number as needed
+chmod +x rocket-3b.Q5.llamafile
+./rocket-3b.Q5.llamafile -p 8081 & # Run on port 8081
+```
 
    - On Windows, you will need to setup WSL and get to the stage of having a WSL terminal active. Then, follow the above steps. Alternatively, you can follow the steps provided (here)[https://github.com/Mozilla-Ocho/llamafile] to launch it from a normal windows CMD prompt.
 
@@ -65,6 +86,7 @@ The project also includes a web interface created using streamlit to keep track 
         -v $(pwd)/TinyLlama-1.1B-Chat-v1.0.F16.llamafile:/app/TinyLlama-1.1B-Chat-v1.0.F16.llamafile  \ 
         my-chatbot 
       ```
+*Note: Ensure the correct paths to your llamafile models are used in the volume mounts.*
 
 ## Testing
 
@@ -130,9 +152,16 @@ Build and Push Docker Image: The Docker image is built and pushed to DockerHub b
 
 This pipeline ensures that the code is always in a deployable state and adheres to the standards set by the team. It automates the process of code integration, testing, and deployment, thereby increasing the development speed and reducing the chances of integration problems.
 
+## Troubleshooting
+
+ * **Port Conflicts:** If you encounter port conflicts, try changing the port numbers used by the llamafile server using the `-p` flag.
+ * **Model Loading Errors:** Make sure the paths to your llamafile models are correct and that the files have execute permissions (`chmod +x`).
+
 ## Future Improvements
 
 - Directly integrate into edge computing cases using appropriate hardware.
+
+- Develop detailed instructions and example scripts for deploying the chatbot on a Raspberry Pi, including hardware setup, software installation, and performance benchmarks.
 
 ## References
 
