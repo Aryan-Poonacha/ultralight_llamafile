@@ -1,5 +1,6 @@
 import streamlit as st
 from openai import OpenAI
+import json
 
 def run_chatbot(user_input, port, instructions):
     """Runs the chatbot, sending user input
@@ -33,12 +34,23 @@ def add_message(role, content):
     st.session_state.messages.append({"role": role, "content": content})
 
 def display_chat_history():
-    """Displays the chat history from session state."""
+    """Displays the chat history from session state and provides download option."""
+    chat_history_text = ""  # Initialize an empty string to store the chat history
     for message in st.session_state.messages:
         if message["role"] == "user":
+            chat_history_text += f"You: {message['content']}\n"
             st.write(f"You: {message['content']}")
         else:
+            chat_history_text += f"Chatbot: {message['content']}\n"
             st.markdown(f"Chatbot: {message['content']}", unsafe_allow_html=True)
+
+    # Add a download button
+    st.download_button(
+        label="Download Chat History",
+        data=chat_history_text,
+        file_name="chat_history.txt",
+        mime="text/plain" 
+    )
 
 # --- Main Streamlit App ---
 st.title("Chat with LLaMA")

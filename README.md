@@ -76,6 +76,10 @@ The project also includes a web interface created using streamlit to keep track 
    - Choose the server port to choose the model you wish to use.
    - Start chatting!
 
+### Exporting Chat History
+
+The Streamlit web interface provides a convenient way to download the entire chat history.  After interacting with the chatbot, a "Download Chat History" button will appear below the chat display. Clicking this button will download a text file named `chat_history.txt` containing the full conversation. This feature allows you to easily save and review your interactions with the chatbot.
+
 ![Streamlit](img/streamlit.PNG)
 
 3. **Run with Docker:**
