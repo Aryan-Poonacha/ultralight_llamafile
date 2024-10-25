@@ -89,6 +89,17 @@ Several quality-of-life and UI improvements have been implemented to enhance the
 
 The Streamlit web interface provides a convenient way to download the entire chat history.  After interacting with the chatbot, a "Download Chat History" button will appear below the chat display. Clicking this button will download a text file named `chat_history.txt` containing the full conversation. This feature allows you to easily save and review your interactions with the chatbot.
 
+### Memory Mapping (Optional)
+
+This project allows you to optionally use memory mapping to load the language model, which can be beneficial for larger models on devices with limited RAM.  Memory mapping loads the model file into memory on demand, rather than all at once, reducing the initial memory usage.
+
+**To enable memory mapping:**
+
+1. In the Streamlit web interface, select the "Use Memory Mapping" checkbox. 
+2. Ensure that `main.py` is configured correctly to handle memory mapping (see the `main.py` script for details).
+
+If memory mapping is not selected, the model will be loaded normally.
+
 ![Streamlit](img/streamlit.PNG)
 
 3. **Run with Docker:**
