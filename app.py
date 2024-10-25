@@ -6,8 +6,10 @@ def load_model_memory_mapped(model_path):
     """Loads a model using memory mapping."""
     # ... (implementation from previous response - remains the same)
 
-def run_chatbot(user_input, port=8080, instructions="You are a helpful AI assistant.", model_path=None):
-    """Runs the chatbot, potentially using a memory-mapped model."""
+def run_chatbot(user_input, port=8080,
+                instructions="You are a helpful AI assistant.", 
+                model_path=None):
+    """Runs chatbot."""
     try:
         client = OpenAI(
             base_url=f"http://localhost:{port}/v1",
@@ -18,8 +20,6 @@ def run_chatbot(user_input, port=8080, instructions="You are a helpful AI assist
             mm = load_model_memory_mapped(model_path)
             if mm:
                 try:
-                    # Example (replace with your actual llama.cpp integration)
-                    # model = llama.cpp.load_model_from_memory(mm) # Hypothetical function
 
                     completion = client.chat.completions.create(
                         model="LLaMA_CPP", # Correct model identifier
@@ -29,20 +29,19 @@ def run_chatbot(user_input, port=8080, instructions="You are a helpful AI assist
                         ]
                     )
                 finally:
-                    mm.close() # Always close the mmap object in the finally block
+                    mm.close() # Always close the mmap object
         else:
-            # ... (Existing logic without memory mapping - remains the same)
-            completion = client.chat.completions.create( # Move this OUTSIDE the if block
-                model="LLaMA_CPP",  # Correct model identifier here as well!
+            completion = client.chat.completions.create(
+                model="LLaMA_CPP",
                 messages=[
                     {"role": "system", "content": instructions},
                     {"role": "user", "content": user_input}
                 ]
             )
 
-        return completion.choices[0].message.content  # This should be outside the if/else
+        return completion.choices[0].message.content
 
-    except Exception as e:  # Handle all exceptions here
+    except Exception as e:
         print(f"An error occurred: {e}")
         return "An error occurred."
     
@@ -55,7 +54,8 @@ def initialize_session_state():
 
 def add_message(role, content):
     """Adds a message to the chat history."""
-    st.session_state.messages.append({"role": role, "content": content})
+    st.session_state.messages.append({"role": role,
+                                      "content": content})
     st.session_state.turn_count += 1
 
 
@@ -68,7 +68,8 @@ def display_chat_history():
             st.write(f"You: {message['content']}")
         else:
             chat_history_text += f"Chatbot: {message['content']}\n"
-            st.markdown(f"Chatbot: {message['content']}", unsafe_allow_html=True)
+            st.markdown(f"Chatbot: {message['content']}",
+                        unsafe_allow_html=True)
 
     st.download_button(
         label="Download Chat History",
@@ -85,8 +86,10 @@ initialize_session_state()
 
 # Model Selection
 model_paths = {  # For memory mapping
-    "TinyLlama": "llamafile/TinyLlama-1.1B-Chat-v1.0.F16.llamafile",
-    "Rocket": "llamafile/rocket-3b.Q5_K_M.llamafile",
+    "TinyLlama":
+    "llamafile/TinyLlama-1.1B-Chat-v1.0.F16.llamafile",
+    "Rocket":
+    "llamafile/rocket-3b.Q5_K_M.llamafile",
     "Other": ""  # Placeholder for other models
 }
 selected_model = st.selectbox("Select Model:", list(model_paths.keys()))
@@ -137,11 +140,12 @@ if "instructions" in st.session_state and "port" in st.session_state:
                     if selected_model == "Other":
                         model_path = model_path_other
                     elif st.session_state.use_mmap:
-                         model_path = model_paths.get(selected_model) # Correctly get path for predefined models
+                         model_path = model_paths.get(selected_model)
                     else:
                         model_path = None
 
-                    response = run_chatbot(user_input, port, st.session_state.instructions, model_path)
+                    response = run_chatbot(user_input, port,
+                                           st.session_state.instructions, model_path)
                     add_message("assistant", response)
 
         display_chat_history()
