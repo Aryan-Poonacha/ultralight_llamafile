@@ -134,9 +134,9 @@ These unit tests are also part of the CI/CD pipeline and run automatically on ev
     else:
         return fibonacci(n-1) + fibonacci(n-2)
 ```
-Here's how you can use it:
-python
->>> fibonacci(10)
+Here's how you can use it in Py terminal:
+
+```>>> fibonacci(10)```
 
 ## Performance/Evaluation 
 
