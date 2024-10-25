@@ -1,27 +1,48 @@
 #!/usr/bin/env python3
 from openai import OpenAI
+import mmap
 
-def run_chatbot(user_input, port=8080, instructions="You are a helpful AI assistant."):
-    """
-    Runs the chatbot. This function is NOT directly tested in unit tests 
-    as it requires a live server. 
-    """
+def load_model_memory_mapped(model_path):
+    """Loads a model using memory mapping."""
+    # ... (implementation from previous response - remains the same)
+
+def run_chatbot(user_input, port=8080, instructions="You are a helpful AI assistant.", model_path=None):
+    """Runs the chatbot, potentially using a memory-mapped model."""
     try:
         client = OpenAI(
-            base_url=f"http://localhost:{port}/v1",  
-            api_key="sk-no-key-required" 
+            base_url=f"http://localhost:{port}/v1",
+            api_key="sk-no-key-required"
         )
 
-        completion = client.chat.completions.create(
-            model="LLaMA_CPP",
-            messages=[
-                {"role": "system", "content": instructions},
-                {"role": "user", "content": user_input} 
-            ]
-        )
-        return completion.choices[0].message.content 
+        if model_path:
+            mm = load_model_memory_mapped(model_path)
+            if mm:
+                try:
+                    # Example (replace with your actual llama.cpp integration)
+                    # model = llama.cpp.load_model_from_memory(mm) # Hypothetical function
 
-    except Exception as e:
+                    completion = client.chat.completions.create(
+                        model="LLaMA_CPP", # Correct model identifier
+                        messages=[
+                            {"role": "system", "content": instructions},
+                            {"role": "user", "content": user_input}
+                        ]
+                    )
+                finally:
+                    mm.close() # Always close the mmap object in the finally block
+        else:
+            # ... (Existing logic without memory mapping - remains the same)
+            completion = client.chat.completions.create( # Move this OUTSIDE the if block
+                model="LLaMA_CPP",  # Correct model identifier here as well!
+                messages=[
+                    {"role": "system", "content": instructions},
+                    {"role": "user", "content": user_input}
+                ]
+            )
+
+        return completion.choices[0].message.content  # This should be outside the if/else
+
+    except Exception as e:  # Handle all exceptions here
         print(f"An error occurred: {e}")
         return "An error occurred."
 
