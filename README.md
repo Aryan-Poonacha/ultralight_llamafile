@@ -39,7 +39,12 @@ This project utilizes a simple architecture:
    ``sudo apt-get update && sudo apt-get install python3.9 python3.9-venv``
    - Create and activate virtual environment:
    ``\python3 -m venv .venv && source .venv/bin/activate``
-   - Download the `TinyLlama-1.1B-Chat-v1.0.F16.llamafile` model from [https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles](https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles) and place it in the root of the project directory inside the 'llamafile' folder. Download any other llamafiles for other models that you want to use. For this use case, the TinyLlama-1.1B-Chat and rocket-3b.Q5 models were chosen as the optimal smallest high performance models for this use case, and are the ones I would recommend.
+   - Clone this repository locally
+   - Navigate to this repository location in CLI
+   - Install required Python packages: 
+   `pip install -r requirements.txt`
+   - Run the download script from your terminal: `python download.py`  This will download by default the TinyLlama and Rocket models and place them in the `llamafile` directory. You can edit the script to add the download links of any other llamafile models you desire by getting the links from [https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles](https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles).
+   - You can also directly download the `TinyLlama-1.1B-Chat-v1.0.F16.llamafile` model from [https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles](https://github.com/Mozilla-Ocho/llamafile#other-example-llamafiles) and place it in the root of the project directory inside the 'llamafile' folder. Download any other llamafiles for other models that you want to use. For this use case, the TinyLlama-1.1B-Chat and rocket-3b.Q5 models were chosen as the optimal smallest high performance models for this use case, and are the ones I would recommend.
 
 2. **Launch TinyLlama Local Server:**
    - On Mac/Linux, provide permission to launch the llamafile with `chmod +x TinyLlama-1.1B-Chat-v1.0.F16.llamafile`. Then, navigate to the directory and run the file with `./llava-v1.5-7b-q4.llamafile`. This will launch the locallama server. Specifically:
@@ -75,6 +80,10 @@ The project also includes a web interface created using streamlit to keep track 
    - Specify a custom system prompt if desired.
    - Choose the server port to choose the model you wish to use.
    - Start chatting!
+
+### Quality of Life and UI Enhancements
+
+Several quality-of-life and UI improvements have been implemented to enhance the user experience. The Streamlit web interface now offers a more streamlined model selection process, allowing users to easily switch between different `llamafile` models (like TinyLlama and Rocket) via a dropdown menu.  A loading indicator provides visual feedback during model processing, preventing confusion and improving responsiveness.  Furthermore, a turn counter displays the number of conversation exchanges, adding context to the interaction.  These enhancements simplify model interaction, provide better feedback, and overall create a more intuitive and user-friendly chatbot experience.
 
 ### Exporting Chat History
 
