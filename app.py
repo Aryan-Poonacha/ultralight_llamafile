@@ -1,10 +1,18 @@
 import streamlit as st
 from openai import OpenAI
 import mmap
+import os
 
-def load_model_memory_mapped(model_path):
+def load_model_memory_mapped(model_path):  # New function
     """Loads a model using memory mapping."""
-    # ... (implementation from previous response - remains the same)
+    try:
+        with open(model_path, "r+b") as f:
+            mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+            return mm # Return the mmap object
+
+    except Exception as e:
+        print(f"Error memory mapping model: {e}")
+        return None
 
 def run_chatbot(user_input, port=8080,
                 instructions="You are a helpful AI assistant.", 
